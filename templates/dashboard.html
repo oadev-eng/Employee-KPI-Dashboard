@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Performance Dashboard</title>
+    <style>
+        table {border-collapse: collapse; width: 80%; margin: 20px auto;}
+        th, td {border: 1px solid #ccc; padding: 8px; text-align: center;}
+        th {background-color: #f2f2f2;}
+        form {text-align: center; margin-top: 20px;}
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Employee Performance Dashboard</h1>
+
+    <form id="employeeForm">
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="text" name="team" placeholder="Team" required>
+        <input type="number" name="tasks_completed" placeholder="Tasks Completed" value="0">
+        <input type="number" step="0.1" name="performance_score" placeholder="Performance Score" value="0.0">
+        <button type="submit">Add Employee</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Team</th>
+                <th>Tasks Completed</th>
+                <th>Performance Score</th>
+                <th>Last Review</th>
+            </tr>
+        </thead>
+        <tbody id="employeeTable">
+            {% for emp in employee %}
+            <tr>
+                <td>{{ emp.id }}</td>
+                <td>{{ emp.name }}</td>
+                <td>{{ emp.team }}</td>
+                <td>{{ emp.tasks_completed }}</td>
+                <td>{{ emp.performance_score }}</td>
+                <td>{{ emp.last_review_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button onclick="exportJSON()">Export JSON</button>
+    </div>
+
+    <script>
+        const form = document.getElementById('employeeForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/add_employee', { method: 'POST', body: formData });
+            const result = await response.json();
+            alert(result.message);
+            location.reload();
+        });
+
+        async function exportJSON() {
+            const response = await fetch('/export_json');
+            const data = await response.json();
+            const blob = new Blob([JSON.stringify(data, null, 4)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'employees.json';
+            a.click();
+        }
+    </script>
+</body>
+</html>
